@@ -18,6 +18,8 @@ import 'screens/wishlist_screen.dart';
 import 'screens/edit_profile_screen.dart';
 import 'screens/security_screen.dart';
 import 'screens/support_screen.dart';
+import 'screens/cart_screen.dart';
+import 'screens/checkout_screen.dart';
 import 'widgets/main_layout.dart';
 
 void main() {
@@ -130,6 +132,14 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/support',
         builder: (context, state) => const SupportScreen(),
+      ),
+      GoRoute(
+        path: '/cart',
+        builder: (context, state) => const CartScreen(),
+      ),
+      GoRoute(
+        path: '/checkout',
+        builder: (context, state) => const CheckoutScreen(),
       ),
     ],
   );

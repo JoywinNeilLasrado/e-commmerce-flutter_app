@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../models/product.dart';
 import '../models/brand.dart';
 import '../widgets/product_card.dart';
+import '../providers/cart_provider.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -28,8 +29,18 @@ class HomeScreen extends ConsumerWidget {
             onPressed: () => context.push('/search'),
           ),
           IconButton(
-            icon: const Icon(Icons.shopping_cart_outlined),
-            onPressed: () {},
+            icon: Badge(
+              label: Text(ref.watch(cartProvider).maybeWhen(
+                data: (cart) => cart.items.length.toString(),
+                orElse: () => '0',
+              )),
+              isLabelVisible: ref.watch(cartProvider).maybeWhen(
+                data: (cart) => cart.items.isNotEmpty,
+                orElse: () => false,
+              ),
+              child: const Icon(Icons.shopping_cart_outlined),
+            ),
+            onPressed: () => context.push('/cart'),
           ),
           IconButton(
             icon: const Icon(Icons.person_outline),

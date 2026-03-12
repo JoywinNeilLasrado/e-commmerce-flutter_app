@@ -3,6 +3,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/product.dart';
 import '../models/user.dart';
+import '../models/cart.dart';
+import '../models/order.dart';
 
 final apiServiceProvider = Provider((ref) => ApiService());
 
@@ -181,5 +183,56 @@ class ApiService {
   Future<Map<String, dynamic>> toggleWishlist(int productId) async {
     final response = await _dio.post('/wishlist/toggle/$productId');
     return response.data;
+  }
+
+  // Cart: Get
+  Future<Cart> getCart() async {
+    final response = await _dio.get('/cart');
+    return Cart.fromJson(response.data['cart']);
+  }
+
+  // Cart: Add
+  Future<void> addToCart(int productId, int quantity) async {
+    await _dio.post(
+      '/cart',
+      data: {'product_id': productId, 'quantity': quantity},
+    );
+  }
+
+  // Cart: Update Item
+  Future<void> updateCartItem(int cartItemId, int quantity) async {
+    await _dio.patch(
+      '/cart/$cartItemId',
+      data: {'quantity': quantity},
+    );
+  }
+
+  // Cart: Remove Item
+  Future<void> removeCartItem(int cartItemId) async {
+    await _dio.delete('/cart/$cartItemId');
+  }
+
+  // Checkout: Get Data
+  Future<CheckoutData> getCheckoutData() async {
+    final response = await _dio.get('/checkout');
+    return CheckoutData.fromJson(response.data);
+  }
+
+  // Checkout: Place Order
+  Future<Order> placeOrder(int addressId, String paymentMethod) async {
+    final response = await _dio.post(
+      '/checkout',
+      data: {'address_id': addressId, 'payment_method': paymentMethod},
+    );
+    return Order.fromJson(response.data['order']);
+  }
+
+  // Checkout: Initiate PayU
+  Future<PayUParameters> initiatePayUPayment(int orderId) async {
+    final response = await _dio.post(
+      '/payment/payu/initiate',
+      data: {'order_id': orderId},
+    );
+    return PayUParameters.fromJson(response.data['payment_parameters']);
   }
 }

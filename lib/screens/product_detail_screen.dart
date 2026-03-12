@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:go_router/go_router.dart';
 import '../providers/product_detail_provider.dart';
 import '../providers/wishlist_provider.dart';
 import '../providers/auth_provider.dart';
+import '../providers/cart_provider.dart';
 import '../models/product.dart';
 import '../widgets/product_card.dart';
 
@@ -485,7 +487,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
           children: [
             Expanded(
               child: OutlinedButton(
-                onPressed: () {},
+                onPressed: () => _handleAddToCart(product),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   side: const BorderSide(color: Colors.blue),
@@ -502,7 +504,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
             const SizedBox(width: 16),
             Expanded(
               child: ElevatedButton(
-                onPressed: () {},
+                onPressed: () => _handleAddToCart(product, isBuyNow: true),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue,
                   foregroundColor: Colors.white,
@@ -522,5 +524,39 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _handleAddToCart(Product product, {bool isBuyNow = false}) async {
+    final authState = ref.read(authProvider);
+    if (!authState.isAuthenticated) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please login to add to cart')),
+      );
+      return;
+    }
+
+    try {
+      await ref.read(cartProvider.notifier).addToCart(product.id);
+      if (!mounted) return;
+
+      if (isBuyNow) {
+        context.push('/cart');
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${product.title} added to cart'),
+            action: SnackBarAction(
+              label: 'VIEW CART',
+              onPressed: () => context.push('/cart'),
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to add to cart: $e')),
+      );
+    }
   }
 }
